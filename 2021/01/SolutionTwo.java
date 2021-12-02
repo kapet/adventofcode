@@ -9,7 +9,7 @@ public class SolutionTwo {
         List<Integer> values = new ArrayList<>();
 
         try {
-            BufferedReader reader = new BufferedReader(new FileReader("01/input.txt"));
+            BufferedReader reader = new BufferedReader(new FileReader("2021/01/input.txt"));
             String line = null;
             while ((line = reader.readLine()) != null) {
                 values.add(Integer.valueOf(line));

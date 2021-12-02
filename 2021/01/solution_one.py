@@ -1,5 +1,5 @@
 # small enough to load into memory
-values = [int(x) for x in open("01/input.txt")]
+values = [int(x) for x in open("2021/01/input.txt")]
 
 previous = values[0]
 increased = 0
