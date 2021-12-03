@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * SolutionOne
  */
-public class SolutionOne {
+public class Day01One {
 
     public static void main(String[] args) {
         List<Integer> values = new ArrayList<>();

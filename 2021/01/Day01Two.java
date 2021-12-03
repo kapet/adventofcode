@@ -3,7 +3,7 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SolutionTwo {
+public class Day01Two {
 
     public static void main(String[] args) {
         List<Integer> values = new ArrayList<>();

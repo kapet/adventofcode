@@ -1,12 +1,11 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 
-public class Two {
+public class Day02One {
 
     public static void main(String[] args) {
         int h = 0;
         int v = 0;
-        int aim = 0;
 
         try {
             BufferedReader reader = new BufferedReader(new FileReader("2021/02/input.txt"));
@@ -17,15 +16,14 @@ public class Two {
                 switch (lineSplit[0]) {
                     case "forward":
                         h += dist;
-                        v += aim * dist;
                         break;
                 
                     case "up":
-                        aim -= dist;
+                        v -= dist;
                         break;
 
                     case "down":
-                        aim += dist;
+                        v += dist;
                         break;
 
                     default:

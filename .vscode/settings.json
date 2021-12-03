@@ -2,4 +2,9 @@
     "files.autoSave": "afterDelay",
     "editor.renderWhitespace": "all",
     "editor.cursorStyle": "block",
+    "java.project.sourcePaths": [
+        "2021/02",
+        "2021/01",
+        "2021/03"
+    ],
 }
