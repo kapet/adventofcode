@@ -1,0 +1,62 @@
+inp w
+mul x 0
+add x z
+mod x 26
+div z 1 1 1 1 26 1 1 26 26 26 26 1 26 26
+add x 10 10 12 11 0 15 13 -12 -15 -15 -4 10 -5 -12
+eql x w
+eql x 0
+mul y 0
+add y 25
+mul y x
+add y 1
+mul z y
+mul y 0
+add y w
+add y 12 10 8 4 3 10 6 13 8 1 7 6 9 9
+mul y x
+add z y
+
+
+
+
+            w = x = y = z = 0
+
+inp w       w = input       w = input
+mul x 0     x *= 0          
+add x z     x += z
+mod x 26    x %= 26         x = z % 26
+div z 1     z /= 1          z = z / 1
+add x 10    x += 10         if (x+10) == w -> x=0 else x=1
+eql x w     x = x==w
+eql x 0     x = x==0
+mul y 0     y *= 0
+add y 25    y += 25
+mul y x     y *= x
+add y 1     y += 1
+mul z y     z *= y          z *= 25*x + 1
+mul y 0     y *= 0
+add y w     y += w
+add y 12    y += 12
+mul y x     y *= x
+add z y     z += y          z += (w+12)*x
+
+            z=0 -> valid
+
+w = input
+zneu = z/1                              keep z as is, or divide by 26
+if w != (z % 26) + 10:                  compare input to z%26 plus offset
+    zneu = zneu * 26 + w + 12           if no match, 
+z = zneu
+
+
+realizations after playing a bit with a spreadsheet:
+- there are two types of digits of equal count, those that grow z and those that shrink it
+- the different divisors show which is which, 1=grow, 26=shrink
+- a grow digit will never have a successful match in the comparison
+- a shrink digit can also not match and cause growth
+- z is kind of a string - every grow digit adds an elemnt, every shrink takes one
+- there are 7 forced grow digits, each multiply input by 26
+- the largest reduction of input is a matching shrink option dividing by 26
+- we need all shrink digits to match or we can not reach 0
+- grow+shrink work in pairs, first digit added must be removed by last shrink op
