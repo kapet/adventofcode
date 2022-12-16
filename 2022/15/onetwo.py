@@ -1,48 +1,32 @@
 import re
 
-minx=miny=maxx=maxy = None
+if 0:
+    infile = '2022/15/test.txt'
+    one_y = 10
+    two_max = 20
+else:
+    infile = '2022/15/input.txt'
+    one_y = 2000000
+    two_max = 4000000
+
 sensordata = []
 m = re.compile(r'Sensor at x=(-?\d+), y=(-?\d+): closest beacon is at x=(-?\d+), y=(-?\d+)$')
-for line in open('2022/15/input.txt'):
+for line in open(infile):
     sx,sy,bx,by = map(int, m.match(line).groups())
-    sensordata.append(((sx,sy),(bx,by)))
-    if minx == None:
-        minx,miny,maxx,maxy = sx,sy,sx,sy
-    for x in (sx, bx):
-        minx = min(minx, x)
-        maxx = max(maxx, x)
-    for y in (sy, by):
-        miny = min(miny, y)
-        maxy = max(maxy, y)
+    distance = abs(sx-bx) + abs(sy-by)
+    ystart = sy-distance
+    yend = sy+distance
+    sensordata.append(((sx,sy),(bx,by),distance,(ystart,yend+1)))
 
-if 0:
-    map_ = [['.']*60 for _ in range(60)]
-    i = 0
-    for sensor, beacon in sensordata:
-        distancey = abs(sensor[0]-beacon[0]) + abs(sensor[1]-beacon[1])
-        for y in range(sensor[1]-distancey, sensor[1]+distancey+1):
-            distancex = distancey - abs(sensor[1]-y)
-            for x in range(sensor[0]-distancex, sensor[0]+distancex+1):
-                if map_[y+30][x+30] not in 'SB':
-                    map_[y+30][x+30] = chr(97+i)
-        map_[sensor[1]+30][sensor[0]+30] = 'S'
-        map_[beacon[1]+30][beacon[0]+30] = 'B'
-        i += 1
-    print('                 1    1    2    2')
-    print('       0    5    0    5    0    5')
-    for i, line in enumerate(map_[30:]):
-        print('{:2} {}'.format(i, ''.join(line[26:])))
+############################# ONE
 
 dest_blocked = []
 beacons = set()
-y = 2000000
-for sensor, beacon in sensordata:
-    if beacon[1] == y:
+for sensor, beacon, distance, yrange in sensordata:
+    if beacon[1] == one_y:
         beacons.add(beacon)
-    # steps to beacon
-    distancey = abs(sensor[0]-beacon[0]) + abs(sensor[1]-beacon[1])
     # how many fields on destination line are included
-    distancex = distancey - abs(sensor[1]-y)
+    distancex = distance - abs(sensor[1]-one_y)
     if distancex > 0:
         # sensor field overlaps destination line
         dest_blocked.append((sensor[0]-distancex, sensor[0]+distancex))
@@ -61,3 +45,31 @@ for x0, x1 in dest_blocked[1:]:
 
 print('one:', count-len(beacons))
 
+############################# TWO
+
+for y in range(0, two_max+1):
+    if y%100000 == 0:
+        print('...', y)
+
+    dest_blocked = []
+    for sensor, beacon, distance, yrange in sensordata:
+        if y < yrange[0] or y >= yrange[1]:
+            continue
+        distancex = distance - abs(sensor[1]-y)
+        if distancex > 0:
+            dest_blocked.append((sensor[0]-distancex, sensor[0]+distancex))
+
+    dest_blocked.sort(key=lambda x: x[0])
+    x = 0
+    for x0, x1 in dest_blocked:
+        if x0 > x:
+            # found a hole
+            print('found hole at:', x, y)
+            print('two:', x*4000000 + y)
+            break
+        x = max(x, x1+1)
+    else:
+        # no hole found
+        continue
+    # found a hole
+    break
