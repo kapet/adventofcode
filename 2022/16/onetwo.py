@@ -115,7 +115,11 @@ while stack:
         continue
     visited_optimum[visited_key] = released
 
+    taken = set()
     for p1, p2 in itertools.product(p1_next, p2_next):
+        if (p2, p1) in taken:
+            # already took this same path with p1/p2 swapped
+            continue
         if p1[0] == p2[0]:
             if p1[0] == '$$':
                 # done
@@ -128,6 +132,7 @@ while stack:
                 # risk: what if only one node remains and BOTH just finished a node?
                 continue
 
+        taken.add((p1, p2))
         stack.append((time_remaining, p1, p2, released, visited.copy()))
 
 print('two:', max_released)
