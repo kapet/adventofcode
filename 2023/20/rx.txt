@@ -1,0 +1,12 @@
+rx: wants a low pulse from qt
+
+qt: needs high pulses from bb, gl, kk, mr
+
+bb, gl, kk, mr: just act as inverters, need low pulse from nl, cr, gl, vj
+
+
+nl: aggregates/influences counter cascade built from 12 flipflops
+    db, ml, bn, hk, rs, hh, rg, hr, kf, xx, ff, ql
+
+Those four blocks are all triggered through a single input and probably
+have some kind of cyclic behavior.
