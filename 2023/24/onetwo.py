@@ -1,66 +1,95 @@
+import numpy as np
+import sympy
+
 hailstones = []
 for line in open('2023/24/input.txt'):
     line = list(map(int, line.replace('@','').replace(',', '').split()))
-    hailstones.append((line[0:3], line[3:]))
-
+    hailstones.append((np.array(line[0:3]), np.array(line[3:])))
 
 _ = '''
 math notes, based on https://stackoverflow.com/questions/73079419/intersection-of-two-vector
 
 one line is:
-    points = [x, y]*s + [a, b]
-with [x, y] being the vector, [a, b] is the base, and s runs along the line
+    points = m*t + b
+with m=[x, y] being the vector, b=[x, y] is the base position, and t is the time
 
 setting two lines equal to look for the crossover point:
-    [x_1, y_1]*s_1 + [a_1, b_1] = [x_2, y_2]*s_2 + [a_2, b_2]
+    m1*t1 + b1 = m2*t1 + b2
 
-rearranged into "v*x=b" matrix form:
-    |x_1, -x_2| * |s_1| = |a_2 - a_1|
-    |y_1, -y_2|   |s_2|   |b_2 - b_1|
+rearranged into "Ax=b" matrix form:
+    |m1.x, -m2.x| * |t1| = |b2.x - b1.x|
+    |m1.y, -m2.y|   |t2|   |b2,y - b1.y|
 
-side note, inverse of a matrix:
-    |a, b|^-1 = 1/(ad - bc) * | d, -b|
-    |c, d|                    |-c,  a|
-
-rearranged into "x=v^-1*b" form:
-    |s_1| = 1/(x_2*y_1 - x_1*y_2) * |-y_2, x_2| * |a_2 - a_1|
-    |s_2|                           |-y_1, x_1|   |b_2 - b_1|
-
-splitting the denominator out:
-    denom = x_2*y_1 - x_1*y_2
-
-solving for s_1 and s_2:
-    s_1 = 1/denom * ((b_2-b_1)*x_2 - (a_2-a_1)*y_2)
-    s_2 = 1/denom * ((b_2-b_1)*x_1 - (a_2-a_1)*y_1)
+this can be solved for [t1, t2] with numpy.linalg.solve
 '''
 
-test_min = 200000000000000
-test_max = 400000000000000
+if len(hailstones) == 5:
+    test_min, test_max = 7, 27
+else:
+    test_min, test_max = 200000000000000,400000000000000
 
 one = 0
-for i, (base1, vector1) in enumerate(hailstones[:-1]):
-    for base2, vector2 in hailstones[i+1:]:
-        denom = vector2[0]*vector1[1] - vector1[0]*vector2[1]
-        if denom:
-            denom = 1/denom
-            xdiff = base2[0]-base1[0]
-            ydiff = base2[1]-base1[1]
-            s1 = denom * (ydiff*vector2[0] - xdiff*vector2[1])
-            s2 = denom * (ydiff*vector1[0] - xdiff*vector1[1])
-            if s1 < 0 and s2 < 0:
-                print(base1, base2, 'crossed in the past for both')
-            elif s1 < 0:
-                print(base1, base2, 'crossed in the past for A')
-            elif s2 < 0:
-                print(base1, base2, 'crossed in the past for B')
+for i, (b1, m1) in enumerate(hailstones[:-1]):
+    b1 = np.delete(b1, 2)
+    m1 = np.delete(m1, 2)
+    for b2, m2 in hailstones[i+1:]:
+        b2 = np.delete(b2, 2)
+        m2 = np.delete(m2, 2)
+        b = b2 - b1
+        A = np.column_stack((m1, -m2))
+        try:
+            t1,t2 = np.linalg.solve(A,b)
+            if t1 < 0 and t2 < 0:
+                # crossed in the past for both
+                pass
+            elif t1 < 0:
+                # crossed in the past for A
+                pass
+            elif t2 < 0:
+                # crossed in the past for B
+                pass
             else:
-                posx = base1[0] + vector1[0] * s1
-                posy = base1[1] + vector1[1] * s1
-                if test_min <= posx <= test_max and test_min <= posy <= test_max:
-                    print(base1, base2, 'within test area')
+                x, y = b1 + m1 * t1
+                if test_min <= x <= test_max and test_min <= y <= test_max:
+                    # within test area
                     one += 1
                 else:
-                    print(base1, base2, 'outside test area')
-        else:
-            print(base1, base2, 'do not intersect')
+                    # outside test area
+                    pass
+        except np.linalg.LinAlgError:
+            # lines do not intersect
+            pass
 print('one:', one)
+
+_ = '''
+more math notes
+
+the input data must be crafted so that all hailstone lines eventually
+intersect with the same line-to-find, but at different times
+
+this creates an equation system like this, for 0 being the one to find:
+    m1*t1 + b1 = m0*t1 + b0
+    m2*t2 + b2 = m0*t2 + b0
+    m3*t3 + b3 = m0*t3 + b0
+    etc. for all hailstones
+
+here I tried reforming these equations into a solvable system, but the
+intermediate terms become unbearable large - too much work
+
+Reading up on reddit on how others solved this is full of math that
+I'm not fluent in and don't want to pick up now. So let's find a way
+to let the computer solve it. First try with just dumping everything
+in Wolfram Alpha failed b/o input length limits.
+
+After some more digging decided to use sympy. *shrug*
+'''
+
+bx = sympy.symbols('bx by bz')
+mx = sympy.symbols('mx my mz')
+tx = sympy.symbols('t1 t2 t3')
+equations = []
+for i, (b, m) in enumerate(hailstones[:3]):
+    for j in range(3): # x/y/z coordinates
+        equations.append(sympy.Eq(m[j]*tx[i]+b[j], mx[j]*tx[i]+bx[j]))
+results = sympy.solve(equations)[0]
+print('two:', sum(results[t] for t in bx))
