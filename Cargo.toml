@@ -1,0 +1,16 @@
+[workspace]
+members = [
+	"crates/aoc-core",
+]
+resolver = "2"
+
+[package]
+name = "aoc-runner"
+version = "0.1.0"
+edition = "2024"
+build = "build.rs"
+
+[dependencies]
+aoc-core = { path = "crates/aoc-core" }
+anyhow = "1"
+regex = "1.12.2"
